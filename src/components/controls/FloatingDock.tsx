@@ -17,9 +17,9 @@ import {
 } from "@/hooks/use-editor-store";
 import { GradientPicker } from "./GradientPicker";
 import { ControlSlider } from "./ControlSlider";
-import { Button } from "@/components/ui/button";
+import { GlassPanel, GlassToggle } from "@/components/glass";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 interface FloatingDockProps {
   onExport: () => Promise<void>;
@@ -64,36 +64,44 @@ export function FloatingDock({ onExport, isExporting }: FloatingDockProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, x: dockPosition === "left" ? -24 : 24 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="w-72 h-screen flex flex-col bg-neutral-900/95 backdrop-blur-2xl border-r border-neutral-700 shadow-2xl"
+      transition={{ type: "spring", stiffness: 300, damping: 35 }}
+      className="w-72 h-screen flex flex-col shrink-0"
     >
-      <div className="flex-1 flex flex-col p-5 space-y-4">
-        {/* Position Toggle */}
-        <div className="flex gap-2 justify-center">
-          {dockPositions.map(({ icon: Icon, value }) => (
-            <button
-              key={value}
-              onClick={() => setDockPosition(value)}
-              className={`p-2 rounded-lg transition-all duration-200 ${
-                dockPosition === value
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
-              }`}
-              title={`Dock ${value}`}
-            >
-              <Icon className="w-4 h-4" />
-            </button>
-          ))}
-        </div>
+      <GlassPanel
+        interactive={false}
+        elevated
+        rounded="2xl"
+        className={cn(
+          "h-full flex flex-col border-white/[0.1]",
+          dockPosition === "left"
+            ? "rounded-l-none rounded-r-2xl border-r"
+            : "rounded-r-none rounded-l-2xl border-l",
+        )}
+      >
+        <div className="flex-1 flex flex-col p-5 space-y-4 overflow-y-auto">
+          {/* Position Toggle */}
+          <div className="flex gap-2 justify-center">
+            {dockPositions.map(({ icon: Icon, value }) => (
+              <GlassToggle
+                key={value}
+                active={dockPosition === value}
+                onClick={() => setDockPosition(value)}
+                className="min-w-0 p-2.5"
+                title={`Dock ${value}`}
+              >
+                <Icon className="w-4 h-4 mx-auto" />
+              </GlassToggle>
+            ))}
+          </div>
 
-        <Separator className="bg-neutral-700" />
+          <Separator className="bg-white/[0.08]" />
 
-        {/* Background Picker */}
-        <GradientPicker />
+          {/* Background Picker */}
+          <GradientPicker />
 
-        <Separator className="bg-neutral-700" />
+          <Separator className="bg-white/[0.08]" />
 
         {/* Width Slider */}
         <ControlSlider
@@ -136,77 +144,78 @@ export function FloatingDock({ onExport, isExporting }: FloatingDockProps) {
           max={48}
         />
 
-        <Separator className="bg-neutral-700" />
+          <Separator className="bg-white/[0.08]" />
 
-        {/* Image Shadow - Compact Grid */}
-        <div>
-          <p className="text-sm font-medium text-neutral-200 mb-2">Shadow</p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {shadowOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => setShadow(option.value)}
-                className={`
-                  px-2.5 py-2 rounded-lg text-xs font-medium transition-all duration-200
-                  ${
-                    shadow === option.value
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "text-neutral-300 hover:bg-neutral-800 hover:text-white bg-neutral-800/50"
-                  }
-                `}
-              >
-                {option.label}
-              </button>
-            ))}
+          {/* Image Shadow */}
+          <div>
+            <p className="text-xs font-medium text-white/60 mb-2 px-1">
+              Shadow
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {shadowOptions.map((option) => (
+                <GlassToggle
+                  key={option.value}
+                  active={shadow === option.value}
+                  onClick={() => setShadow(option.value)}
+                >
+                  {option.label}
+                </GlassToggle>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Aspect Ratio - Compact */}
-        <div>
-          <p className="text-sm font-medium text-neutral-200 mb-2 flex items-center gap-2">
-            <LayoutGrid className="w-4 h-4" />
-            Ratio
-          </p>
-          <Tabs
-            value={aspectRatio}
-            onValueChange={(v) => setAspectRatio(v as AspectRatioType)}
-          >
-            <TabsList className="w-full bg-neutral-800 border border-neutral-700 h-9">
+          {/* Aspect Ratio */}
+          <div>
+            <p className="text-xs font-medium text-white/60 mb-2 flex items-center gap-2 px-1">
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Ratio
+            </p>
+            <div className="flex gap-2 flex-wrap">
               {aspectRatios.map((ratio) => (
-                <TabsTrigger
+                <GlassToggle
                   key={ratio.value}
-                  value={ratio.value}
-                  className="flex-1 text-xs font-medium text-neutral-300 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                  active={aspectRatio === ratio.value}
+                  onClick={() => setAspectRatio(ratio.value)}
                 >
                   {ratio.label}
-                </TabsTrigger>
+                </GlassToggle>
               ))}
-            </TabsList>
-          </Tabs>
+            </div>
+          </div>
+
+          {/* Spacer to push button to bottom */}
+          <div className="flex-1 min-h-4" />
         </div>
 
-        {/* Spacer to push button to bottom */}
-        <div className="flex-1" />
-
-        {/* Export Button */}
-        <Button
-          onClick={onExport}
-          disabled={isExporting}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-[0_0_20px_rgba(37,99,235,0.5)] font-semibold py-5 rounded-xl"
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Copying...
-            </>
-          ) : (
-            <>
-              <Copy className="w-4 h-4 mr-2" />
-              Copy
-            </>
-          )}
-        </Button>
-      </div>
+        {/* Export Button - glass-style primary */}
+        <div className="p-4 pt-0">
+          <motion.button
+            type="button"
+            onClick={onExport}
+            disabled={isExporting}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-white
+              bg-white/15 border border-white/20
+              shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_20px_rgba(0,0,0,0.2)]
+              hover:bg-white/20 hover:border-white/30
+              disabled:opacity-50 disabled:pointer-events-none
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+            whileTap={{ scale: 0.98, y: 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Copying...
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Copy
+              </>
+            )}
+          </motion.button>
+        </div>
+      </GlassPanel>
     </motion.div>
   );
 }
