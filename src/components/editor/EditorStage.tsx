@@ -5,6 +5,27 @@ import { Canvas } from "./Canvas";
 import { DropZone } from "./DropZone";
 import { FloatingDock } from "../controls/FloatingDock";
 import { useImageExport } from "@/hooks/use-image-export";
+import { GlassPanel } from "@/components/glass";
+
+function GlassCanvasWrapper({
+  isAnimating,
+  canvasRef,
+}: {
+  isAnimating: boolean;
+  canvasRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <GlassPanel
+      interactive
+      parallax={6}
+      elevated
+      rounded="3xl"
+      className={isAnimating ? "animate-flash-green" : ""}
+    >
+      <Canvas ref={canvasRef} />
+    </GlassPanel>
+  );
+}
 
 export function EditorStage() {
   const imageSrc = useEditorStore((state) => state.imageSrc);
@@ -41,11 +62,12 @@ export function EditorStage() {
 
   return (
     <div className={containerClass}>
-      {/* Canvas Area */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className={isAnimating ? "animate-flash-green" : ""}>
-          <Canvas ref={canvasRef} />
-        </div>
+      {/* Canvas Area - glass panel with parallax & specular */}
+      <div className="flex-1 flex items-center justify-center p-8 perspective-[1200px]">
+        <GlassCanvasWrapper
+          isAnimating={isAnimating}
+          canvasRef={canvasRef}
+        />
       </div>
 
       {/* Dock */}

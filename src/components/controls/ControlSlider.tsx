@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
+import { GlassSlider } from "@/components/glass";
 
 interface ControlSliderProps {
   icon: LucideIcon;
@@ -22,13 +22,15 @@ export function ControlSlider({
 }: ControlSliderProps) {
   return (
     <div className="flex items-center gap-3 min-w-[200px]">
-      <Icon className="w-4 h-4 text-neutral-400 shrink-0" />
-      <div className="flex-1 space-y-1">
+      <Icon className="w-4 h-4 text-white/50 shrink-0" />
+      <div className="flex-1 space-y-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-neutral-300">{label}</span>
-          <span className="text-xs text-neutral-500 font-mono">{value}</span>
+          <span className="text-xs font-medium text-white/80">{label}</span>
+          <span className="text-xs text-white/50 font-mono tabular-nums">
+            {value}
+          </span>
         </div>
-        <Slider
+        <GlassSlider
           value={[value]}
           onValueChange={(vals) => onChange(vals[0])}
           min={min}
